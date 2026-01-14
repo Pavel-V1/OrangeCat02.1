@@ -1,3 +1,5 @@
+package ChineseCheckers;
+
 import javax.swing.*;
 import java.awt.*;
 
