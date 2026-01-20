@@ -3,9 +3,11 @@ package Reversi;
 import java.util.ArrayList;
 
 public abstract class Board {
-    private final int GRID_LENGTH = 8;
-    private final Integer[][] grid = new Integer[GRID_LENGTH][GRID_LENGTH];
-    private final ArrayList<ArrayList<Chip>> allChips = new ArrayList<>(GRID_LENGTH);
+
+    private final int GRID_WIDTH = 8;
+    private final int GRID_HEIGHT = 8;
+    private Integer[][] grid = new Integer[GRID_WIDTH][GRID_WIDTH];
+    private final ArrayList<ArrayList<Chip>> allChips = new ArrayList<>(GRID_WIDTH);
     private int counter1;
     private int counter2;
     private boolean gameOver = false;
@@ -13,48 +15,47 @@ public abstract class Board {
     private Player player2;
 
     public Board() {
-        for (int i = 0; i < GRID_LENGTH; i++) {
-            allChips.add(new ArrayList<>(GRID_LENGTH));
-            for (int j = 0; j < GRID_LENGTH; j++) {
+        for (int i = 0; i < GRID_WIDTH; i++) {
+            allChips.add(new ArrayList<>(GRID_WIDTH));
+            for (int j = 0; j < GRID_WIDTH; j++) {
                 grid[i][j] = 0;
             }
         }
 
-        grid[GRID_LENGTH / 2 - 1][GRID_LENGTH / 2] = 1;
-        allChips.get(GRID_LENGTH / 2 - 1).add(new Chip(1, GRID_LENGTH / 2 - 1, GRID_LENGTH / 2)); // d5
-        grid[GRID_LENGTH / 2][GRID_LENGTH / 2 - 1] = 1;
-        allChips.get(GRID_LENGTH / 2).add(new Chip(1, GRID_LENGTH / 2, GRID_LENGTH / 2 - 1)); // e4
-        grid[GRID_LENGTH / 2 - 1][GRID_LENGTH / 2 - 1] = 2;
-        allChips.get(GRID_LENGTH / 2 - 1).add(new Chip(2, GRID_LENGTH / 2 - 1, GRID_LENGTH / 2 - 1)); // d4
-        grid[GRID_LENGTH / 2][GRID_LENGTH / 2] = 2;
-        allChips.get(GRID_LENGTH / 2).add(new Chip(2, GRID_LENGTH / 2, GRID_LENGTH / 2)); // e5
+        grid[GRID_WIDTH / 2 - 1][GRID_WIDTH / 2] = 1;
+        allChips.get(GRID_WIDTH / 2 - 1).add(new Chip(1, GRID_WIDTH / 2 - 1, GRID_WIDTH / 2)); // d5
+        grid[GRID_WIDTH / 2][GRID_WIDTH / 2 - 1] = 1;
+        allChips.get(GRID_WIDTH / 2).add(new Chip(1, GRID_WIDTH / 2, GRID_WIDTH / 2 - 1)); // e4
+        grid[GRID_WIDTH / 2 - 1][GRID_WIDTH / 2 - 1] = 2;
+        allChips.get(GRID_WIDTH / 2 - 1).add(new Chip(2, GRID_WIDTH / 2 - 1, GRID_WIDTH / 2 - 1)); // d4
+        grid[GRID_WIDTH / 2][GRID_WIDTH / 2] = 2;
+        allChips.get(GRID_WIDTH / 2).add(new Chip(2, GRID_WIDTH / 2, GRID_WIDTH / 2)); // e5
 
         counter1 = 2; // На поле уже есть по 2 фишки у каждого игрока.
         counter2 = 2;
     }
 
-    abstract boolean makeTurn(Board board, int turn, int counter1, int counter2);
-    abstract void showGameOver(Board board, int counter1, int counter2);
-    abstract void startGame(Board board, Player player1, Player player2);
+    abstract void showGameOver(int counter1, int counter2, Player player1, Player player2);
+    abstract void startGame();
 
     public Integer[][] getGrid() {
         return grid.clone();
     }
 
     public final void setPlayer1(Player player1) {
-        if (this.player1 != null) {
+        if (this.player1 == null) {
             this.player1 = player1;
         }
     }
 
     public final void setPlayer2(Player player2) {
-        if (this.player2 != null) {
+        if (this.player2 == null) {
             this.player2 = player2;
         }
     }
 
-    public final boolean setChip(int player, int row, int col) {
-        if (player >= 1 && player <= 2 && row >= 0 && row < GRID_LENGTH && col >= 0 && col < GRID_LENGTH) {
+    public boolean setChip(int player, int row, int col) {
+        if (player >= 1 && player <= 2 && row >= 0 && row < GRID_WIDTH && col >= 0 && col < GRID_WIDTH) {
             if (gameOver || grid[row][col] != 0) {
                 return false;
             }
@@ -76,15 +77,94 @@ public abstract class Board {
     }
 
     public void launch() {
-        startGame(this, player1, player2);
+        startGame();
         int turn = 1;
         while (!gameOver) {
-            boolean successful = makeTurn(this, turn, counter1, counter2);
+            GameInfo gi;
+            if (turn == 1) {
+                gi = new GameInfo() {
+                    @Override
+                    public int getWidth() {
+                        return GRID_WIDTH;
+                    }
+
+                    @Override
+                    public int getHeight() {
+                        return GRID_HEIGHT;
+                    }
+
+                    @Override
+                    public int getCell(int row, int col) {
+                        return grid[row][col];
+                    }
+
+                    @Override
+                    public Integer[][] getGrid() {
+                        return grid.clone();
+                    }
+                }; //обычная
+            } else {
+                gi = new GameInfo() {
+                    @Override
+                    public int getWidth() {
+                        return GRID_WIDTH;
+                    }
+
+                    @Override
+                    public int getHeight() {
+                        return GRID_HEIGHT;
+                    }
+
+                    @Override
+                    public int getCell(int row, int col) {
+                        return grid[row][col];
+                    }
+
+                    @Override
+                    public Integer[][] getGrid() {
+                        return getReversedGrid(grid);
+                    }
+                }; //перевернутая
+            }
+
+            Position position = getPlayer(turn).getMakerTurn().makeTurn(gi);
+            int row;
+            int col;
+            if (turn == 2) {
+                row = GRID_HEIGHT - 1 - position.getRow();
+                col = GRID_WIDTH - 1 - position.getCol();
+            } else {
+                row = position.getRow();
+                col = position.getCol();
+            }
+            boolean successful = setChip(turn, row, col);
             if (successful) {
                 turn = turn == 1 ? 2 : 1;
             }
         }
-        showGameOver(this, counter1, counter2);
+        showGameOver(counter1, counter2, player1, player2);
+    }
+
+    private Player getPlayer(int number) {
+        if (number == 1) {
+            return player1;
+        } else {
+            return player2;
+        }
+    }
+
+    private static Integer[][] getReversedGrid(Integer[][] grid) {
+        Integer[][] newGrid = new Integer[grid.length][grid.length];
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid.length; j++) {
+                if (grid[i][j] == 0) {
+                    newGrid[grid.length - 1 - i][grid.length - 1 - j] = grid[i][j];
+                } else {
+                    newGrid[grid.length - 1 - i][grid.length - 1 - j] = grid[i][j] == 1 ? 2 : 1;
+                }
+            }
+        }
+        return newGrid;
     }
 
     private static boolean gridIsFull(Integer[][] grid) {
@@ -161,7 +241,7 @@ public abstract class Board {
         }
         chips.clear(); // Если так и не встретится другая фишка игрока - забываем накопленные фишки
 
-        for (int i = row + 1; i < GRID_LENGTH; i++) {
+        for (int i = row + 1; i < GRID_WIDTH; i++) {
             canSetInt = checkWay(player, i, col, chips); // Вправо
             if (canSetInt != 1) {
                 break;
@@ -181,7 +261,7 @@ public abstract class Board {
             canSet = true;
         }
         chips.clear();
-        for (int i = col + 1; i < GRID_LENGTH; i++) {
+        for (int i = col + 1; i < GRID_WIDTH; i++) {
             canSetInt = checkWay(player, row, i, chips); // Вниз
             if (canSetInt != 1) {
                 break;
@@ -201,7 +281,7 @@ public abstract class Board {
             canSet = true;
         }
         chips.clear();
-        for (int i = 1; row + i < GRID_LENGTH && col - i >= 0; i++) {
+        for (int i = 1; row + i < GRID_WIDTH && col - i >= 0; i++) {
             canSetInt = checkWay(player, row + i, col - i, chips); // Вправо-вверх
             if (canSetInt != 1) {
                 break;
@@ -211,7 +291,7 @@ public abstract class Board {
             canSet = true;
         }
         chips.clear();
-        for (int i = 1; row - i >= 0 && col + i < GRID_LENGTH; i++) {
+        for (int i = 1; row - i >= 0 && col + i < GRID_WIDTH; i++) {
             canSetInt = checkWay(player, row - i, col + i, chips); // Влево-вниз
             if (canSetInt != 1) {
                 break;
@@ -221,7 +301,7 @@ public abstract class Board {
             canSet = true;
         }
         chips.clear();
-        for (int i = 1; row + i < GRID_LENGTH && col + i < GRID_LENGTH; i++) {
+        for (int i = 1; row + i < GRID_WIDTH && col + i < GRID_WIDTH; i++) {
             canSetInt = checkWay(player, row + i, col + i, chips); // Вправо-вниз
             if (canSetInt != 1) {
                 break;

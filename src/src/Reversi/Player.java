@@ -3,15 +3,16 @@ package Reversi;
 public class Player {
     private final int number;
     private final String name;
+    private MakerTurn mt;
 
-    public Player(int number, String name) {
+    public Player(int number, String name, MakerTurn makerTurn) {
         this.number = number;
         this.name = name;
+        this.mt = makerTurn;
     }
 
-    public Player(int number) {
-        this.number = number;
-        this.name = "";
+    public MakerTurn getMakerTurn() {
+        return mt;
     }
 
     public int getNumber() {
@@ -20,5 +21,9 @@ public class Player {
 
     public String getName() {
         return name;
+    }
+
+    public Player clone() {
+        return new Player(number, name, mt);
     }
 }

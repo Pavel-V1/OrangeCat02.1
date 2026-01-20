@@ -5,19 +5,20 @@ import java.util.Scanner;
 public class MainInterface extends Board {
 
     @Override
-    public void startGame(Board board, Player player1, Player player2) {}
-
-    @Override
-    public boolean makeTurn(Board board, int turn, int counter1, int counter2) {
+    public void startGame() {
         Scanner scanner = new Scanner(System.in);
-        Integer[][] currentGrid = board.getGrid();
+        System.out.print("Введите имя первого игрока: ");
+        setPlayer1(new Player(1, scanner.next(), new HumanMakerTurn()));
+        System.out.print("Введите имя второго игрока: ");
+        setPlayer2(new Player(2, scanner.next(), new BotMakerTurn()));
+    }
 
-        if (turn == 2) {
-            currentGrid = getReversedGrid(currentGrid);
-        }
+    /*public Position makeTurn(GameInfo gameInfo) {
+        Scanner scanner = new Scanner(System.in);
+        Integer[][] currentGrid = gameInfo.getGrid();
 
-        System.out.println("Ход игрока: " + turn);
-        System.out.println("Счет: " + counter1 + ":" + counter2);
+        System.out.println("Ход игрока: " + gameInfo.getPlayer());
+        System.out.println("Счет: " + gameInfo.getCounter1() + ":" + gameInfo.getCounter2());
         System.out.println();
         print(currentGrid);
         System.out.println();
@@ -27,12 +28,7 @@ public class MainInterface extends Board {
         System.out.print("Введите столбец: ");
         int col = scanner.nextInt();
 
-        boolean success;
-        if (turn == 2) {
-            success = board.setChip(turn, 8 - row, 8 - col);
-        } else {
-            success = board.setChip(turn, row - 1, col - 1);
-        }
+        boolean success = setChip(gameInfo.getPlayer().getNumber(), row - 1, col - 1);
 
         if (success) {
             System.out.println("-----------------------------------");
@@ -41,28 +37,26 @@ public class MainInterface extends Board {
             System.out.println("Неверные данные, попробуйте еще раз.");
             return false;
         }
-    }
+    }*/
 
     @Override
-    public void showGameOver(Board board, int counter1, int counter2) {
+    public void showGameOver(int counter1, int counter2, Player player1, Player player2) {
         System.out.println("Игра закончилась.");
         System.out.println("Счет: " + counter1 + ":" + counter2);
         if (counter1 == counter2) {
             System.out.println("Ничья.");
         } else {
             int winner = counter1 > counter2 ? 1 : 2;
-            System.out.println("Победитель: " + winner); // Можно сделать вывод имени
+            System.out.println("Победитель: " + getWinner(winner, player1, player2));
         }
     }
 
-    private static Integer[][] getReversedGrid(Integer[][] grid) {
-        Integer[][] newGrid = new Integer[grid.length][grid.length];
-        for (int i = 0; i < grid.length; i++) {
-            for (int j = 0; j < grid.length; j++) {
-                newGrid[grid.length - 1 - i][grid.length - 1 - j] = grid[i][j];
-            }
+    private String getWinner(int winner, Player player1, Player player2) {
+        if (winner == 1) {
+            return player1.getName();
+        } else {
+            return player2.getName();
         }
-        return newGrid;
     }
 
     private static void print(Integer[][] grid) {
