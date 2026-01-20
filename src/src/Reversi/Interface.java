@@ -1,5 +1,0 @@
-package Reversi;
-
-class Interface {
-    //
-}

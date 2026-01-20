@@ -1,18 +1,18 @@
 package Reversi;
 
 class Chip {
-    private int color;  // подразумеваются собственные цвета, отличия по номеру, без лишних импортов
+    private int player;
     private final int row;
     private final int col;
 
-    public Chip(int color, int row, int col) {
-        this.color = color;
+    public Chip(int player, int row, int col) {
+        this.player = player;
         this.row = row;
         this.col = col;
     }
 
-    protected void changeColor() {
-        this.color = color == 1 ? 2 : 1;
+    protected void changePlayer() {
+        this.player = player == 1 ? 2 : 1;
     }
 
     public int getRow() {
@@ -21,5 +21,9 @@ class Chip {
 
     public int getCol() {
         return col;
+    }
+
+    public int getPlayer() {
+        return player;
     }
 }

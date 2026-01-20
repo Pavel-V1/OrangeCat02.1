@@ -1,7 +1,8 @@
 package Reversi;
 
 public class Main {
-    public static void main(String[] args) {
-        Board board = new Board();
+    static void main() {
+        Board game = new MainInterface();
+        game.launch();
     }
 }
