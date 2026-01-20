@@ -5,6 +5,9 @@ import java.util.Scanner;
 public class MainInterface extends Board {
 
     @Override
+    public void startGame(Board board, Player player1, Player player2) {}
+
+    @Override
     public boolean makeTurn(Board board, int turn, int counter1, int counter2) {
         Scanner scanner = new Scanner(System.in);
         Integer[][] currentGrid = board.getGrid();
